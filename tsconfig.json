@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES6",                          // Version de JavaScript à laquelle le code TypeScript sera compilé
+    "module": "commonjs",                     // Type de module à utiliser
+    "outDir": "./dist",                       // Répertoire où les fichiers JavaScript compilés seront placés
+    "rootDir": "./src",                       // Répertoire racine des fichiers source TypeScript
+    "esModuleInterop": true,                  // Assure la compatibilité avec les modules CommonJS et ES Modules
+    "strict": true,                           // Active toutes les vérifications strictes
+    "moduleResolution": "node",               // Utilise la résolution de module compatible avec Node.js
+    "skipLibCheck": true,                     // Ignore la vérification des fichiers de déclaration (*.d.ts)
+    "forceConsistentCasingInFileNames": true  // Assure une cohérence dans les noms de fichiers
+  },
+  "include": ["src/**/*.ts"],                 // Inclut tous les fichiers TypeScript dans le répertoire src
+  "exclude": ["node_modules"]                 // Exclut le répertoire node_modules
+}
