@@ -24,6 +24,14 @@ const create = async (
     startTime: Date,
     endTime: Date
   ): Promise<PrismaAppointment> => {
+
+    const hasConflict = await checkConflict(hostId, clientId, startTime, endTime);
+
+    if (hasConflict) {
+
+      throw new Error('Appointments conflict detected');
+    }
+
     try {
       
       return await prisma.appointment.create({
@@ -54,6 +62,15 @@ const update = async (
     startTime: Date,
     endTime: Date
   ): Promise<PrismaAppointment> => {
+
+
+    const hasConflict = await checkConflict(hostId, clientId, startTime, endTime);
+
+    if (hasConflict) {
+      
+      throw new Error('Appointments conflict detected.');
+    }
+
     try {
 
       return await prisma.appointment.update({
@@ -92,9 +109,61 @@ const deleteAppointment = async (id: number): Promise<boolean> => {
   }
 };
 
+const checkConflict = async (
+  hostId: number,
+  clientId: number,
+  startTime: Date,
+  endTime: Date,
+): Promise<boolean> => {
+    try {
+
+      const hostConflict = await prisma.appointment.findMany({
+        where: {
+          hostId: hostId,
+          OR: [
+            {
+              startTime: {
+                lte: endTime,
+              },
+              endTime: {
+                gte: startTime,
+              },
+            },
+          ],
+        },
+      });
+
+      const clientConflict = await prisma.appointment.findMany({
+        where: {
+          clientId: clientId,
+          OR: [
+            {
+              startTime: {
+                lte: endTime,
+              },
+              endTime: {
+                gte: startTime,
+              },
+            },
+          ],
+        },
+      });
+  
+
+    return hostConflict.length > 0 || clientConflict.length > 0;
+
+  } catch (error) {
+
+    console.error('Error checking for conflicts:', error);
+    throw error;
+  }
+};
+
+
 export default {
     index,
     create,
     update,
     delete: deleteAppointment,
+    checkConflict
 }
