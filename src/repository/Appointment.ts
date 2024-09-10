@@ -1,17 +1,13 @@
-import { Appointment } from "../models/Appointment"
-import { Vendor } from "../models/Vendor"
-import { Buyer } from "../models/Buyer"
-
 import { PrismaClient, Appointment as PrismaAppointment } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-let appointments: Appointment[] = [];
-
 const index = async(): Promise<PrismaAppointment[]> => {
 
     try {
-        return await prisma.appointment.findMany();
+        return await prisma.appointment.findMany({
+          where: { deletedAt: null }
+      });
     }
     catch(error) {
         console.error('Error fetching appointments:', error);
@@ -21,30 +17,26 @@ const index = async(): Promise<PrismaAppointment[]> => {
 
 const create = async (
     title: string,
-    type: 'physical' | 'physical',
+    type: 'VIRTUAL' | 'PHYSICAL',
     location: string | null | undefined,
-    host: Vendor,
-    client: Buyer,
+    hostId: number,
+    clientId: number,
     startTime: Date,
     endTime: Date
-  ): Promise<Appointment> => {
+  ): Promise<PrismaAppointment> => {
     try {
-
-      const newAppointment: Appointment = {
-        id: appointments.length + 1, 
-        title,
-        type,
-        location, 
-        host,
-        client,
-        startTime,
-        endTime,
-      };
-  
-      appointments.push(newAppointment);
-  
-      return newAppointment;
-
+      
+      return await prisma.appointment.create({
+        data: {
+          title,
+          type,
+          location,
+          host:{ connect: { id: hostId } },
+          client:{ connect: { id: clientId }},
+          startTime,
+          endTime
+        },
+      })
     } catch (error) {
 
       console.error('Error creating appointment:', error);
@@ -55,32 +47,30 @@ const create = async (
 const update = async (
     id: number,
     title: string,
-    type: 'virtual' | 'physical',
+    type: 'VIRTUAL' | 'PHYSICAL',
     location: string | null,
-    host: Vendor,
-    client: Buyer,
+    hostId: number,
+    clientId: number,
     startTime: Date,
     endTime: Date
-  ): Promise<Appointment | null> => {
+  ): Promise<PrismaAppointment> => {
     try {
-      const appointmentIndex = appointments.findIndex((appt) => appt.id === id);
-  
-      if (appointmentIndex === -1) {
-        return null;
-      }
 
-      appointments[appointmentIndex] = {
-        id,
-        title,
-        type,
-        location: type === 'physical' ? location : null,
-        host,
-        client,
-        startTime,
-        endTime,
-      };
-  
-      return appointments[appointmentIndex];
+      return await prisma.appointment.update({
+        where: {
+          id: id
+        },
+        data: {
+          title,
+          type,
+          location,
+          host:{ connect: { id: hostId } },
+          client:{ connect: { id: clientId }},
+          startTime,
+          endTime
+        }
+      })
+
     } catch (error) {
       console.error('Error updating appointment:', error);
       throw error;
@@ -88,19 +78,18 @@ const update = async (
 };
 
 const deleteAppointment = async (id: number): Promise<boolean> => {
-    try {
-      const appointmentIndex = appointments.findIndex((appt) => appt.id === id);
-  
-      if (appointmentIndex === -1) {
-        return false;
-      }
-  
-      appointments.splice(appointmentIndex, 1);
-      return true;
-    } catch (error) {
+  try {
+
+      const updatedAppointment = await prisma.appointment.update({
+          where: { id: id },
+          data: { deletedAt: new Date() }
+      });
+
+      return !!updatedAppointment;
+  } catch (error) {
       console.error('Error deleting appointment:', error);
       throw error;
-    }
+  }
 };
 
 export default {

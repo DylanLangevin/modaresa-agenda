@@ -10,6 +10,7 @@ app.use(express.json());
 // Get all appointments
 app.get('/appointments', ApppointmentController.index)
 
+// Create an appointment
 app.post('/appointments', ApppointmentController.create);
 
 // Update an appointment by ID

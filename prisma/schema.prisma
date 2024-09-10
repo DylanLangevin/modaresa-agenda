@@ -24,13 +24,14 @@ model Appointment {
     id        Int      @id @default(autoincrement())
     title     String
     type      AppointmentType
-    location  String?  // Location is optional for virtual appointments
+    location  String?
     startTime DateTime
     endTime   DateTime
     host      Vendor   @relation(fields: [hostId], references: [id])
     hostId    Int
     client    Buyer    @relation(fields: [clientId], references: [id])
     clientId  Int
+    deletedAt DateTime?
 }
 
 enum AppointmentType {

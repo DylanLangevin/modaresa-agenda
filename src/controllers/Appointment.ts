@@ -82,7 +82,13 @@ const deleteAppointment = async (req: Request, res: Response): Promise<void> => 
     try {
         const { id } = req.params;
 
-        res.status(204).send();
+        const deletedAppointment = await AppointmentRepository.delete(parseInt(id))
+
+        if (deletedAppointment) {
+            res.status(204).send();
+        } else {
+            res.status(404).json({ error: 'Appointment not found' }); 
+        }
     } catch (error) {
         if (error instanceof Error) {
             res.status(400).json({ error: error.message });
