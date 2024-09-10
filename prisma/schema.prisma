@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Vendor {
+    id           Int           @id @default(autoincrement())
+    name         String
+    appointments Appointment[]
+}
+
+model Buyer {
+    id           Int           @id @default(autoincrement())
+    name         String
+    companyName  String
+    appointments Appointment[]
+}
+
+model Appointment {
+    id        Int      @id @default(autoincrement())
+    title     String
+    type      AppointmentType
+    location  String?  // Location is optional for virtual appointments
+    startTime DateTime
+    endTime   DateTime
+    host      Vendor   @relation(fields: [hostId], references: [id])
+    hostId    Int
+    client    Buyer    @relation(fields: [clientId], references: [id])
+    clientId  Int
+}
+
+enum AppointmentType {
+    VIRTUAL
+    PHYSICAL
+}
