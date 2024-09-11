@@ -1,7 +1,15 @@
 import express from 'express';
+const cors = require('cors');
 import ApppointmentController from './controllers/Appointment'
 const app = express();
 const port = 3000;
+
+app.use(cors({
+    // mettre dans .env
+    origin: 'http://localhost:3001',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+}));
 
 app.use(express.json());
 
