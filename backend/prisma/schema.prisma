@@ -1,0 +1,40 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl", "linux-musl-openssl-3.0.x"]
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Vendor {
+    id           Int           @id @default(autoincrement())
+    name         String
+    appointments Appointment[]
+}
+
+model Buyer {
+    id           Int           @id @default(autoincrement())
+    name         String
+    companyName  String
+    appointments Appointment[]
+}
+
+model Appointment {
+    id        Int      @id @default(autoincrement())
+    title     String
+    type      AppointmentType
+    location  String?
+    startTime DateTime
+    endTime   DateTime
+    host      Vendor   @relation(fields: [hostId], references: [id])
+    hostId    Int
+    client    Buyer    @relation(fields: [clientId], references: [id])
+    clientId  Int
+    deletedAt DateTime?
+}
+
+enum AppointmentType {
+    VIRTUAL
+    PHYSICAL
+}
